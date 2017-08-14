@@ -1,4 +1,4 @@
-// Copyright © 2017 Sebastian Döll <sebastian@katallaxie.me>
+// Copyright © 2017 Axel Springer SE
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,17 +24,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/katallaxie/kombinat/server"
+	"github.com/axelspringer/kombinat/server"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 var (
-	serverPort     int
-	serverInterace string
+	cfgFile string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -44,7 +41,7 @@ var RootCmd = &cobra.Command{
 	Long:  ``,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: server.NewServer().Run,
+	RunE: server.Run,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -57,18 +54,25 @@ func Execute() {
 }
 
 func init() {
+	// initialize config
 	cobra.OnInitialize(initConfig)
+
+	// adds the `version` command
+	RootCmd.AddCommand(versionCmd)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.trabant.yaml)")
+	RootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kombinat.yaml)")
 
-	// port
-	RootCmd.PersistentFlags().IntVarP(&serverPort, "port", "p", 8080, "port on which the server will listen")
+	// etcd
+	RootCmd.PersistentFlags().BoolVarP(&server.EtcdEnable, "etcd", "", server.DefaultEtcdEnable, "enable etcd curation")
 
-	// interface
-	RootCmd.PersistentFlags().StringVarP(&serverInterace, "bind", "", "0.0.0.0", "interace to which the server will bind")
+	// etcd endpoint
+	RootCmd.Flags().StringVarP(&server.EtcdEndpoint, "etcd-endpoint", "", server.DefaultEtcdEndpoint, "etcd endpoint url (e.g. http://127.0.0.1:2379)")
+
+	// verbosity
+	RootCmd.PersistentFlags().BoolVarP(&server.Verbose, "verbose", "v", false, "verbose output")
 }
 
 // initConfig reads in config file and ENV variables if set.

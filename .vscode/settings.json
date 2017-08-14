@@ -1,3 +1,4 @@
 {
-     "go.useLanguageServer": true
+     "go.useLanguageServer": true,
+     "go.formatOnSave": true
 }
